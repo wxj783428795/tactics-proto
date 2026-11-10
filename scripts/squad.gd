@@ -18,6 +18,7 @@ var patrol_index: int = 0
 var recover_time: float = 0.0  # 战后整备剩余秒数：期间原地不动、不会触发遭遇
 var pursue_target = null        # 追击目标（敌方小队）；为 null 时按普通行军
 var repath_timer: float = 0.0
+var edge_other: String = ""   # 静止停在道路中间时（例如被击退后原地待命），所在道路的另一端；at_node 是这一端
 var waiting: bool = false      # 战败后的待机：原地不动、不能主动交战，但可以被敌方攻击（攻方获得先制）
 var max_morale: int = 0        # 首领士气上限（0 = 不是首领）
 var morale: float = 0.0
@@ -33,8 +34,11 @@ func is_moving() -> bool:
 	return not path.is_empty()
 
 
+## 行军终点；静止在节点上时是该节点；停在道路中间时返回 ""（不朝任何节点前进）
 func destination() -> String:
-	return path.back() if not path.is_empty() else at_node
+	if not path.is_empty():
+		return path.back()
+	return "" if edge_other != "" else at_node
 
 
 ## 只算未倒下成员的 HP 比例（首领倒下的成员不会复活，用它判断是否需要休整）

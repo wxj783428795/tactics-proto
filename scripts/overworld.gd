@@ -375,6 +375,8 @@ func _refresh_hud() -> void:
 	elif selected.is_moving():
 		var d: Dictionary = model.nodes[selected.destination()]
 		where = "行军中 → %s" % (d["name"] if d["name"] != "" else "路口")
+	elif model.is_parked(selected):
+		where = "道路上待命（等待新命令）"
 	if selected.pursue_target != null:
 		where = "追击：%s" % selected.pursue_target.name
 	var lines := PackedStringArray()

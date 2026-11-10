@@ -121,7 +121,7 @@ func _initialize() -> void:
 	var ev3 := k.apply_battle_result(kd, ks, 1)
 	var back: float = before.distance_to(kd.pos)
 	check(absf(back - MapModel.KNOCKBACK_DIST) < 0.5, "败方被击退 %.0f 像素" % back)
-	check(kd.pos.distance_to(k.nodes["P_HQ"]["pos"]) < before.distance_to(k.nodes["P_HQ"]["pos"]) and kd.path == ["P_HQ"], "朝来路（晨星营地）方向后退")
+	check(kd.pos.distance_to(k.nodes["P_HQ"]["pos"]) < before.distance_to(k.nodes["P_HQ"]["pos"]) and kd.path.is_empty() and k.edge_of(kd).has("P_HQ") and k.edge_of(kd).has("ford"), "朝来路（晨星营地）方向后退，停在道路上（%s）" % str(k.edge_of(kd)))
 	check(ev3.any(func(e): return e["type"] == "knockback"), "产生击退事件：" + str(ev3.map(func(e): return e["text"])))
 	check(ks.pos == ks_before, "胜方原地不动")
 
@@ -147,7 +147,9 @@ func _initialize() -> void:
 	wolf.pos = Vector2(-999, -999)
 	for i in 15:
 		k.update(0.1)
-	check(not kd.is_recovering() and not kd.waiting and kd.pos != p_before, "待机结束后继续退向来路")
+	check(not kd.is_recovering() and not kd.waiting and kd.pos == p_before and kd.path.is_empty() and k.node_of(kd) == "", "待机结束后仍停在击退位置，不会自己走到节点")
+
+	_parked_checks()
 
 	print("=== 5. 击退：站在普通据点上战败，被推离据点 ===")
 	var n := new_model()
@@ -162,7 +164,8 @@ func _initialize() -> void:
 	n.apply_battle_result(nd, nc, 0)
 	var wp: Vector2 = n.nodes["windmill"]["pos"]
 	check(nc.pos.distance_to(wp) > 60.0 and nc.pos.x > wp.x, "敌方被推离风车丘，朝远离我方的东侧（距离 %.0f）" % nc.pos.distance_to(wp))
-	check(nc.destination() in ["r5", "r6", "r3", "r4"], "沿道路退向相邻节点「%s」" % nc.destination())
+	var ne: Array = n.edge_of(nc)
+	check(nc.path.is_empty() and ne.has("windmill") and (ne.has("r5") or ne.has("r6") or ne.has("r3") or ne.has("r4")), "停在通往相邻节点的道路上 %s" % str(ne))
 
 	print("=== 6. 耐久：守军在场无法占领，战败原地硬直 ===")
 	var d := new_model()
@@ -269,3 +272,122 @@ func _initialize() -> void:
 
 	print("=== 结果：%s（失败 %d 项）===" % ["全部通过" if failures == 0 else "有失败", failures])
 	quit(1 if failures > 0 else 0)
+
+
+## 复现第 3 节：晨星小队从营地开往白石渡，途中被沙蝎小队击败并击退。返回 [模型, 败方, 胜方]
+func parked_scenario(player_wins: bool = false) -> Array:
+	var k := new_model()
+	only_enemies(k, ["sand"])
+	var kd = k.squad_by_id("dawn")
+	var ks = k.squad_by_id("sand")
+	place(k, kd, "P_HQ")
+	k.order_move(kd, "ford")
+	for i in 30:
+		k.update(0.1)
+	place(k, ks, "ford")
+	ks.pos = kd.pos + Vector2(10, 0)
+	ks.at_node = "ford"
+	ks.path = []
+	ks.edge_other = "P_HQ"
+	if player_wins:
+		k.apply_battle_result(kd, ks, 0)
+		return [k, ks, kd]
+	k.apply_battle_result(kd, ks, 1)
+	return [k, kd, ks]
+
+
+## 沿道路行军直到到达 dest；每一步都检查是否在 y=330 这条路（营地—白石渡—风车丘）上
+func walk_on_row(k, sq, dest: String, max_t: float = 30.0) -> bool:
+	var on_road := true
+	var t := 0.0
+	while sq.at_node != dest and t < max_t:
+		k.update(0.1)
+		t += 0.1
+		if sq.at_node != dest and absf(sq.pos.y - 330.0) > 0.5:
+			on_road = false
+	return on_road and sq.at_node == dest
+
+
+func _parked_checks() -> void:
+	print("=== 4b. 击退后原地待命，直到收到新命令 ===")
+	var r := parked_scenario()
+	var k = r[0]
+	var kd = r[1]
+	var ks = r[2]
+	ks.alive = false  # 移除胜方，避免干扰行军
+	var p0: Vector2 = kd.pos
+	check(kd.path.is_empty() and k.node_of(kd) == "" and kd.destination() == "" and k.is_parked(kd), "击退后：不在节点上、没有行军路线（停在 %s 之间）" % str(k.edge_of(kd)))
+	for i in int((MapModel.WAIT_TIME + 1.5) / 0.1):
+		k.update(0.1)
+	check(not kd.waiting and kd.pos.distance_to(p0) < 0.01 and kd.path.is_empty(), "待机结束 1.5 秒后仍在原位（位移 %.3f）" % kd.pos.distance_to(p0))
+	k.stop(kd)
+	check(kd.path.is_empty() and kd.pos == p0, "对停在路上的小队「原地停止」不会让它走回节点")
+	check(k.nearest_friendly_node(kd) == "P_HQ" and absf(k.route_cost(kd, "P_HQ") - p0.distance_to(k.nodes["P_HQ"]["pos"])) < 0.5, "路程按所在道路计算（到营地 %.0f）" % k.route_cost(kd, "P_HQ"))
+	# 往回走：去营地后面的 r1，必须先沿这条路回到营地，不能斜穿
+	k.order_move(kd, "r1")
+	check(kd.path.size() == 2 and kd.path[0] == "P_HQ" and kd.at_node == "ford", "去 r1：先沿道路回营地 %s" % str(kd.path))
+	check(walk_on_row(k, kd, "P_HQ"), "回营地途中一直在道路上")
+	# 往前走
+	r = parked_scenario()
+	k = r[0]
+	kd = r[1]
+	r[2].alive = false
+	for i in int(MapModel.WAIT_TIME / 0.1) + 2:
+		k.update(0.1)
+	k.order_move(kd, "windmill")
+	check(kd.path == ["ford", "windmill"] and kd.at_node == "P_HQ", "去风车丘：沿道路向前经白石渡 %s" % str(kd.path))
+	check(walk_on_row(k, kd, "windmill"), "向前行军一直在道路上并到达风车丘")
+	# 追击停在路上的敌人
+	r = parked_scenario(true)
+	k = r[0]
+	var loser = r[1]  # 敌方沙蝎，停在路上
+	var winner = r[2]
+	check(k.is_parked(loser), "敌方败者也停在路上 %s" % str(k.edge_of(loser)))
+	var wolf = k.squad_by_id("wolf")
+	place(k, wolf, "windmill")
+	winner.alive = false
+	k.order_pursue(wolf, loser)
+	var t := 0.0
+	while k.pending_encounter.is_empty() and t < 20.0:
+		k.update(0.1)
+		t += 0.1
+	check(not k.pending_encounter.is_empty() and k.pending_encounter[0] == wolf, "从风车丘追击停在路上的敌人，%.1f 秒后接触" % t)
+
+	print("=== 4c. 胜方保留原命令；停在路上的小队再次战败会继续后退 ===")
+	r = parked_scenario(true)
+	k = r[0]
+	loser = r[1]
+	winner = r[2]
+	var w0: Vector2 = winner.pos
+	check(winner.path == ["ford"], "胜方保留前往白石渡的命令")
+	var moved_after := false
+	for i in int(MapModel.RECOVER_TIME / 0.1) + 4:
+		k.update(0.1)
+		if not k.pending_encounter.is_empty():
+			break
+	moved_after = winner.pos.x > w0.x
+	check(moved_after and winner.destination() == "ford", "整备结束后胜方继续前往白石渡（x %.0f → %.0f）" % [w0.x, winner.pos.x])
+	# 第二次击退：停在路上的败者再次战败
+	r = parked_scenario()
+	k = r[0]
+	kd = r[1]
+	ks = r[2]
+	var e0: Array = k.edge_of(kd)
+	var pa: Vector2 = kd.pos
+	ks.pos = kd.pos + Vector2(10, 0)
+	ks.recover_time = 0.0
+	k.apply_battle_result(kd, ks, 1)
+	check(kd.path.is_empty() and (k.edge_of(kd) == e0 or k.node_of(kd) == "P_HQ") and kd.pos.x < pa.x, "再次被击退：沿同一条路继续后退并停下（x %.0f → %.0f）" % [pa.x, kd.pos.x])
+	# AI：敌方败者待机结束后可以自己下新命令（不是残留的击退路线）
+	r = parked_scenario(true)
+	k = r[0]
+	loser = r[1]
+	r[2].alive = false
+	loser.ai = {"mode": "advance", "targets": ["windmill", "ford", "P_HQ"]}  # 去掉 60 秒延迟
+	k.ai_enabled = true
+	var le: Array = k.edge_of(loser)
+	for i in int((MapModel.WAIT_TIME + 2.0) / 0.1):
+		k.update(0.1)
+		if loser.is_moving():
+			break
+	check(loser.is_moving() and le.has(loser.at_node) and absf(loser.pos.y - 330.0) < 0.5, "敌方 AI 待机后从路上出发，沿所在道路（%s）经端点「%s」前往 %s" % [str(le), loser.at_node, str(loser.path)])

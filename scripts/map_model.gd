@@ -303,6 +303,10 @@ func order_move(sq, dest: String) -> bool:
 
 
 func _route(sq, dest: String) -> bool:
+	var e := edge_of(sq)
+	if not e.is_empty():
+		return _route_from_edge(sq, e, dest)
+	sq.edge_other = ""
 	if not sq.is_moving():
 		if dest == sq.at_node:
 			return true
@@ -312,10 +316,15 @@ func _route(sq, dest: String) -> bool:
 		p.remove_at(0)
 		sq.path = p
 		return true
-	# 行军途中：比较"继续前进到下一个节点"与"返回上一个节点"两种走法
+	sq.path = []  # 刚出发、仍在出发节点上：按静止处理
+	return _route(sq, dest)
+
+
+## 在道路中间（行军途中或停在路上）：比较经由道路两端的走法，只沿这条路走向其中一端
+func _route_from_edge(sq, e: Array, dest: String) -> bool:
 	var best: Array = []
 	var best_len := INF
-	for via in [sq.path[0], sq.at_node]:
+	for via in e:
 		var p2 := find_path(via, dest)
 		if p2.is_empty():
 			continue
@@ -325,15 +334,23 @@ func _route(sq, dest: String) -> bool:
 			best = p2
 	if best.is_empty():
 		return false
+	# 保持「at_node = 背后的一端，path[0] = 前方的一端」
+	sq.at_node = e[1] if best[0] == e[0] else e[0]
 	sq.path = best
+	sq.edge_other = ""
 	return true
 
 
 func stop(sq) -> void:
 	sq.pursue_target = null
-	# 停在最近经过的节点方向：直接返回上一个节点
+	# 行军中：返回上一个节点停下；已经停在路上（如被击退后待命）则原地不动
 	if sq.is_moving():
-		sq.path = [sq.at_node] if sq.pos.distance_to(nodes[sq.at_node]["pos"]) > 0.5 else []
+		if sq.pos.distance_to(nodes[sq.at_node]["pos"]) > 0.5:
+			var ahead: String = sq.path[0]
+			sq.path = [sq.at_node]
+			sq.at_node = ahead
+		else:
+			sq.path = []
 
 
 # ---------------------------------------------------------------- 追击
@@ -350,9 +367,20 @@ func order_pursue(sq, target) -> bool:
 
 ## 小队若在某条道路中间（不在节点上），返回 [起点, 终点]，否则返回 []
 func edge_of(sq) -> Array:
-	if sq.is_moving() and sq.pos.distance_to(nodes[sq.at_node]["pos"]) > 0.5:
+	if sq.pos.distance_to(nodes[sq.at_node]["pos"]) <= 0.5:
+		return []
+	if sq.is_moving():
+		if sq.path[0] == sq.at_node:
+			return []  # 不应出现；防御性处理
 		return [sq.at_node, sq.path[0]]
+	if sq.edge_other != "":
+		return [sq.at_node, sq.edge_other]  # 停在道路中间待命
 	return []
+
+
+## 是否静止停在道路中间（不在任何节点上）
+func is_parked(sq) -> bool:
+	return not sq.is_moving() and not edge_of(sq).is_empty()
 
 
 ## 从小队当前位置沿道路到节点 dest 的路程
@@ -385,6 +413,7 @@ func _repath_pursuit(sq) -> void:
 		var far: String = a if t.pos.distance_to(nodes[a]["pos"]) < sq.pos.distance_to(nodes[a]["pos"]) else b
 		sq.path = [far]
 		sq.at_node = b if far == a else a
+		sq.edge_other = ""
 		return
 	# 先到目标所在道路较合适的一端，再沿这条路走向另一端（途中必然接触目标）
 	var ca: float = route_cost(sq, a) + t.pos.distance_to(nodes[a]["pos"])
@@ -466,6 +495,8 @@ func _income(delta: float, ev: Array) -> void:
 
 
 func _move(sq, delta: float) -> void:
+	if sq.is_moving():
+		sq.edge_other = ""
 	if not sq.is_moving() or sq.is_recovering():
 		return
 	var speed := MOVE_SPEED * (1.0 if sq.stamina > 0.0 else TIRED_SPEED_FACTOR)
@@ -775,33 +806,33 @@ func _advance(sq, dist: float) -> void:
 
 ## 最近的己方据点（按路程，可排除某个节点）
 func nearest_friendly_node(sq, exclude: String = "") -> String:
-	var start: String = sq.path[0] if sq.is_moving() else sq.at_node
 	var best := ""
 	var best_len := INF
 	for id in node_ids:
 		if id == exclude or not is_capturable(id) or nodes[id]["owner"] != sq.team:
 			continue
-		var p := find_path(start, id)
-		if p.is_empty():
-			continue
-		var l: float = path_length(p) + sq.pos.distance_to(nodes[start]["pos"])
+		var l: float = route_cost(sq, id)
 		if l < best_len:
 			best_len = l
 			best = id
 	return best
 
 
-## 击退：沿道路远离 from_sq 推开 dist 像素。之后小队会走到被推向的那个节点。
+## 击退：沿道路远离 from_sq 推开 dist 像素，然后停在原地等待新命令（不会自己走完剩下的路）。
 ## 无路可退（没有相邻道路）时原地硬直。
 func _knockback(sq, from_sq, dist: float, ev: Array) -> void:
 	var away: Vector2 = sq.pos - from_sq.pos
-	var on_edge: bool = sq.is_moving() and sq.pos.distance_to(nodes[sq.at_node]["pos"]) > 0.5
-	if on_edge:
-		var ea: String = sq.at_node
-		var eb: String = sq.path[0]
-		# 选择离胜方更远的一端
+	var cur_edge := edge_of(sq)
+	if not cur_edge.is_empty():
+		var ea: String = cur_edge[0]
+		var eb: String = cur_edge[1]
+		# 朝背离胜方的那一端退（几乎重合时取离胜方更远的一端）
 		var to: String = ea
-		if from_sq.pos.distance_to(nodes[eb]["pos"]) > from_sq.pos.distance_to(nodes[ea]["pos"]) + 0.5:
+		var da: float = (nodes[ea]["pos"] - sq.pos).dot(away)
+		var db: float = (nodes[eb]["pos"] - sq.pos).dot(away)
+		if away.length() >= 1.0 and absf(da - db) > 0.01:
+			to = eb if db > da else ea
+		elif from_sq.pos.distance_to(nodes[eb]["pos"]) > from_sq.pos.distance_to(nodes[ea]["pos"]) + 0.5:
 			to = eb
 		sq.path = [to]
 		sq.at_node = eb if to == ea else ea
@@ -839,10 +870,24 @@ func _knockback(sq, from_sq, dist: float, ev: Array) -> void:
 				best = m
 		sq.path = [best]
 		sq.at_node = here
+	sq.edge_other = ""
+	var toward: String = sq.path[0]
 	_advance(sq, dist)
-	var dest: String = sq.destination()
-	var dn: String = nodes[dest]["name"] if nodes[dest]["name"] != "" else "路口"
-	ev.append({"type": "knockback", "squad": sq.id, "text": "%s 被击退，退向「%s」" % [sq.name, dn]})
+	_park(sq)
+	var dn: String = nodes[toward]["name"] if nodes[toward]["name"] != "" else "路口"
+	ev.append({"type": "knockback", "squad": sq.id, "text": "%s 被击退，退向「%s」方向，原地待命" % [sq.name, dn]})
+
+
+## 击退后原地停下：还在道路中间就记下道路另一端，清空行军路线；已经退到节点上就停在节点
+func _park(sq) -> void:
+	if sq.is_moving() and sq.pos.distance_to(nodes[sq.at_node]["pos"]) > 0.5 and sq.pos.distance_to(nodes[sq.path[0]]["pos"]) > 0.5:
+		sq.edge_other = sq.path[0]
+	else:
+		if sq.is_moving() and sq.pos.distance_to(nodes[sq.path[0]]["pos"]) <= 0.5:
+			sq.at_node = sq.path[0]
+		sq.pos = nodes[sq.at_node]["pos"] if sq.pos.distance_to(nodes[sq.at_node]["pos"]) <= 0.5 else sq.pos
+		sq.edge_other = ""
+	sq.path = []
 
 
 ## 无 UI 时直接自动打完当前遭遇（测试 / 快速结算用）。返回 [日志, 事件]
@@ -894,7 +939,12 @@ func _run_ai() -> void:
 
 
 func _target_node_of(sq) -> String:
-	return sq.path[0] if sq.is_moving() else sq.at_node
+	if sq.is_moving():
+		return sq.path[0]
+	var e := edge_of(sq)
+	if not e.is_empty():  # 停在路上：取较近的一端
+		return e[0] if sq.pos.distance_to(nodes[e[0]]["pos"]) <= sq.pos.distance_to(nodes[e[1]]["pos"]) else e[1]
+	return sq.at_node
 
 
 func _ai_defend(sq) -> void:
