@@ -27,9 +27,9 @@
    - 空格暂停，F 键切换速度（1x / 2x / 4x）。
    - 右侧面板可以「编队」「战术」「原地停止」；战役中还可以「撤退」，沙盒模式是「保存」。
    - 敌我小队相遇时自动进入战斗：战前可以调整阵型、编辑战术，然后「开始战斗」或「跳过演出」，打完点「返回地图」。
-   - 每章目标显示在左上角：攻陷大本营 / 坚守 N 秒 / 击败首领。
+   - 每章目标显示在左上角：攻陷大本营 / 坚守 N 秒 / 击败首领（首领有士气条：士气归零或全员倒下才算击败）。
    - 我方据点每 10 秒产生资金。
-   - 战斗后败方会被击退，双方原地整备 3 秒（地图上有倒计时圈）。
+   - 战斗后败方会被击退并「待机」4 秒（橙色圈）：不能行动，但可以被攻击，攻方获得「先制攻击」（第一轮全员先动）；胜方整备 2.5 秒（白色圈），期间不交战。
    - 大本营和要塞有耐久条：有守军时无法占领，每打赢守军一场就削减耐久，归零后守军溃退。
 5. 单独测试战斗：在编辑器里打开 `scenes/battle_test.tscn` 并运行当前场景（F6）。
 
@@ -44,7 +44,7 @@
 - `scripts/battle_view.gd`、`unit_cell.gd`：战斗界面
 - `scripts/rule_editor.gd`、`formation_editor.gd`、`ui_util.gd`：编辑器弹窗
 - `data/classes.json`：职业、技能、默认战术；`data/campaign.json`：地图、据点、小队、AI；`data/battle_setup.json`：单独战斗配置；`data/items.json`：道具；`data/campaign/`：战役任务、地图、招募（由 `tools/make_campaign_data.py` 生成）
-- `tests/run_battle_test.gd`、`run_map_test.gd`、`run_class_test.gd`、`run_campaign_test.gd`、`run_siege_test.gd`、`run_pursuit_test.gd`：无头测试
+- `tests/run_battle_test.gd`、`run_map_test.gd`、`run_class_test.gd`、`run_campaign_test.gd`、`run_siege_test.gd`、`run_pursuit_test.gd`、`run_boss_test.gd`：无头测试
 - `tests/screenshot.gd`、`screenshot_classes.gd`、`screenshot_campaign.gd`：截图（需要图形环境）
 - `docs/`：截图
 - `assets/fonts/`：Noto Sans CJK SC 子集（SIL OFL 协议）。新增汉字后运行 `python3 tools/make_font_subset.py` 重新生成，否则网页版里新字会显示成方块。
@@ -74,6 +74,7 @@ godot --headless --path . --script res://tests/run_class_test.gd   # 新职业�
 godot --headless --path . --script res://tests/run_campaign_test.gd  # 成长 / 装备 / 名册 / 战役 / 存档 / 界面测试
 godot --headless --path . --script res://tests/run_siege_test.gd     # 战后击退 / 整备 / 据点耐久 / 攻城回归测试
 godot --headless --path . --script res://tests/run_pursuit_test.gd   # 追击敌方小队测试
+godot --headless --path . --script res://tests/run_boss_test.gd      # 首领士气 / 战败待机 / 先制攻击测试
 godot --headless --path . --export-release Web build/web/index.html  # 导出网页版（需要先安装 4.3 导出模板）
 ```
 网页版是无线程导出，不需要 SharedArrayBuffer 或 COOP/COEP 响应头，可以直接把 build/web 打成 zip 上传到 itch.io（选择 HTML 类型）。
@@ -84,7 +85,7 @@ godot --headless --path . --export-release Web build/web/index.html  # 导出网
 工作流文件是 `.github/workflows/deploy-web.yml`。每次推送到 `main` 都会自动执行，也可以在 Actions 页面手动运行（workflow_dispatch）。步骤如下：
 1. 下载 Godot 4.3-stable（Linux）和 4.3 网页导出模板，并用 `actions/cache` 缓存。
 2. 用 `--headless --import` 导入项目。
-3. 运行全部无头测试（battle / map / class / campaign / siege / pursuit），任何一项失败都会中止发布。
+3. 运行全部无头测试（battle / map / class / campaign / siege / pursuit / boss），任何一项失败都会中止发布。
 4. 导出 `Web` 预设（无线程）到 `build/web`，并加上 `.nojekyll`。
 5. 用 `actions/upload-pages-artifact` 和 `actions/deploy-pages` 发布。
 

@@ -124,14 +124,25 @@ func _draw() -> void:
 				var dir := Vector2.from_angle(PI / 2.0 * k)
 				draw_line(dp + dir * 14.0, dp + dir * 25.0, rc2, 2.0)
 		if sq.is_recovering():
-			# 整备倒计时圈：剩余时间越少圈越短；硬直为紫色
-			var rf: float = sq.recover_time / model.RECOVER_TIME
-			var rc := Color(0.75, 0.45, 1.0) if sq.stunned else Color(0.85, 0.95, 1.0)
+			# 倒计时圈：胜方整备为白色；败方待机为橙色（据点内硬直为紫色），并标注「待机」
+			var full: float = model.WAIT_TIME if sq.waiting else model.RECOVER_TIME
+			var rf: float = clampf(sq.recover_time / full, 0.0, 1.0)
+			var rc := Color(0.85, 0.95, 1.0)
+			if sq.waiting:
+				rc = Color(0.75, 0.45, 1.0) if sq.stunned else Color(1.0, 0.6, 0.2)
 			draw_arc(dp, 20.0, -PI / 2, -PI / 2 + TAU * rf, 28, rc, 3.0)
 			draw_string(font, dp + Vector2(14, -10), "%.0f" % ceil(sq.recover_time), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, rc)
+			if sq.waiting:
+				draw_string(font, dp + Vector2(-40, 0), "待机", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, rc)
 		# 叠放时名字上下交替，避免重叠
 		var name_y := -16.0 if idx % 2 == 0 else 32.0
 		draw_string(font, dp + Vector2(-40, name_y), sq.name, HORIZONTAL_ALIGNMENT_CENTER, 80, 12, Color.WHITE)
+		if sq.max_morale > 0:
+			# 首领士气条（紫红色），在名字上方
+			var my := name_y - 18.0 if name_y < 0 else -30.0
+			draw_rect(Rect2(dp + Vector2(-18, my), Vector2(36, 5)), Color(0.15, 0.15, 0.15))
+			draw_rect(Rect2(dp + Vector2(-18, my), Vector2(36 * sq.morale / float(sq.max_morale), 5)), Color(0.9, 0.3, 0.75))
+			draw_string(font, dp + Vector2(20, my + 6), "士气%d" % int(ceil(sq.morale)), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.95, 0.6, 0.9))
 		# 体力条
 		draw_rect(Rect2(dp + Vector2(-14, 14), Vector2(28, 4)), Color(0.15, 0.15, 0.15))
 		draw_rect(Rect2(dp + Vector2(-14, 14), Vector2(28 * sq.stamina / 100.0, 4)), Color(0.95, 0.85, 0.3))

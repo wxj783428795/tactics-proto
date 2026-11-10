@@ -26,6 +26,7 @@ var squad_names: Array = ["我方", "敌方"]
 
 var units: Array = []          # Array of BattleUnit
 var round_no: int = 0
+var first_strike_team: int = -1  # 先制攻击方（攻击处于待机状态的敌队）：第 1 轮该方全员先于敌方行动；-1 = 无
 var queue: Array = []
 var acted_this_round: bool = false  # 本轮是否有人真正行动（全员待机则结束战斗）
 var finished: bool = false
@@ -215,6 +216,8 @@ func _start_round(out: PackedStringArray) -> bool:
 		_finish_by_hp(out)
 		return false
 	queue.sort_custom(_initiative_less)
+	if round_no == 1 and first_strike_team >= 0 and first_strike_team < squad_names.size():
+		out.append("【先制攻击！】%s 趁敌方阵脚未稳，第一轮全员抢先行动" % squad_names[first_strike_team])
 	var names := PackedStringArray()
 	for u in queue:
 		names.append("%s(%d)" % [u.display_name, u.eff_spd()])
@@ -224,6 +227,8 @@ func _start_round(out: PackedStringArray) -> bool:
 
 ## 先攻排序：速度高者先；同速时我方先；再按格子顺序。
 func _initiative_less(a, b) -> bool:
+	if round_no == 1 and first_strike_team >= 0 and a.team != b.team:
+		return a.team == first_strike_team
 	if a.eff_spd() != b.eff_spd():
 		return a.eff_spd() > b.eff_spd()
 	if a.team != b.team:

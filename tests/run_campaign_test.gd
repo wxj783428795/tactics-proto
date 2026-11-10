@@ -36,6 +36,7 @@ func unit(cid: String, lv: int = 1, extra: Dictionary = {}):
 ## 自动驾驶：按任务目标指挥我方，遭遇自动结算。返回 [地图, 战斗场数]
 func autopilot(model, max_time: float = 900.0) -> Array:
 	var battles := 0
+	var boss_wins := 0  # 战胜首领的次数（每次都会产生士气事件）
 	var target := ""
 	match str(model.objective.get("type", "")):
 		"capture_hq":
@@ -62,9 +63,12 @@ func autopilot(model, max_time: float = 900.0) -> Array:
 			model.order_move(sq, target)
 		model.update(0.1)
 		if not model.pending_encounter.is_empty():
-			model.resolve_encounter_auto()
+			var rr: Array = model.resolve_encounter_auto()
 			battles += 1
-	return [model, battles]
+			for e in rr[1]:
+				if e["type"] == "morale":
+					boss_wins += 1
+	return [model, battles, boss_wins]
 
 
 func _init() -> void:
@@ -234,7 +238,7 @@ func _init() -> void:
 			c.promote(uu.uid)
 	var r3: Array = autopilot(c.create_mission_model(2))
 	var res3: Dictionary = c.finish_mission(r3[0])
-	print("    第三章：%s，用时 %.0f 秒，%s" % ["胜利" if res3["won"] else "失败", res3["time"], res3["reason"]])
+	print("    第三章：%s，用时 %.0f 秒，%s，战胜首领 %d 次" % ["胜利" if res3["won"] else "失败", res3["time"], res3["reason"], r3[2]])
 	check(res3["won"] and c.is_complete(), "第三章胜利，战役完成")
 	check(res3["progress"] is PackedStringArray or res3["progress"] is Array, "结算包含成长记录（%d 条）" % res3["progress"].size())
 
@@ -268,7 +272,7 @@ func _init() -> void:
 		var lv := PackedStringArray()
 		for uu in b.roster:
 			lv.append("%s%d" % [uu.display_name, uu.level])
-		print("    第%d章：%s 用时 %.0f 秒 战斗 %d 场（胜 %d 负 %d）金币 %d | %s" % [i + 1, "胜利" if resb["won"] else "失败", resb["time"], rr[1], resb["battles_won"], resb["battles_lost"], b.gold, " ".join(lv)])
+		print("    第%d章：%s 用时 %.0f 秒 战斗 %d 场（胜 %d 负 %d）金币 %d 战胜首领 %d 次 | %s | %s" % [i + 1, "胜利" if resb["won"] else "失败", resb["time"], rr[1], resb["battles_won"], resb["battles_lost"], b.gold, rr[2], resb["reason"], " ".join(lv)])
 		if not resb["won"]:
 			break
 		for uu in b.roster:

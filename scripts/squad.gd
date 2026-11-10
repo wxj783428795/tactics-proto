@@ -18,6 +18,10 @@ var patrol_index: int = 0
 var recover_time: float = 0.0  # 战后整备剩余秒数：期间原地不动、不会触发遭遇
 var pursue_target = null        # 追击目标（敌方小队）；为 null 时按普通行军
 var repath_timer: float = 0.0
+var waiting: bool = false      # 战败后的待机：原地不动、不能主动交战，但可以被敌方攻击（攻方获得先制）
+var max_morale: int = 0        # 首领士气上限（0 = 不是首领）
+var morale: float = 0.0
+var resting: bool = false      # 首领 AI：残血时回据点休整
 var stunned: bool = false      # 死守据点战败、无路可退时陷入硬直（同样计入 recover_time）
 
 
@@ -31,6 +35,17 @@ func is_moving() -> bool:
 
 func destination() -> String:
 	return path.back() if not path.is_empty() else at_node
+
+
+## 只算未倒下成员的 HP 比例（首领倒下的成员不会复活，用它判断是否需要休整）
+func living_hp_ratio() -> float:
+	var cur := 0
+	var mx := 0
+	for u in units:
+		if u.is_alive():
+			cur += u.hp
+			mx += u.max_hp
+	return float(cur) / float(max(1, mx))
 
 
 func living_count() -> int:

@@ -59,7 +59,7 @@ jobs:
       - name: Run headless tests
         run: |
           set -o pipefail
-          for t in battle map class campaign siege pursuit; do
+          for t in battle map class campaign siege pursuit boss; do
             echo "::group::run_${t}_test"
             timeout 300 ~/godot/$GODOT_BIN --headless --path . --script res://tests/run_${t}_test.gd 2>&1 | tee /tmp/t.txt
             echo "::endgroup::"

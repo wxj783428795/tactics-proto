@@ -23,7 +23,13 @@ const BASE_HP_REGEN := 0.08       # 己方据点每秒恢复最大 HP 的 8%（�
 const CAPTURE_TIME := 3.0         # 占领所需秒数
 const ENCOUNTER_DIST := 16.0      # 敌我小队距离小于此值即遭遇
 const AI_INTERVAL := 1.0
-const RECOVER_TIME := 3.0          # 战后整备秒数（双方）
+const RECOVER_TIME := 2.5          # 胜方（及平局双方）的战后整备秒数：期间不能交战，也不会被攻击
+const WAIT_TIME := 4.0             # 败方的待机秒数：不能移动、不能主动交战，但可以被攻击（攻方先制）
+const BOSS_HP_REGEN := 0.02        # 首领在己方据点每秒只恢复最大 HP 的 2%，倒下的成员不会复活
+const BOSS_MORALE_REGEN := 0.5     # 首领在己方据点静止休整时，士气每秒恢复
+const BOSS_MORALE_MIN_LOSS := 15
+const BOSS_RETREAT_HP := 0.5       # 首领 AI：在场成员 HP 低于此比例时回据点休整
+const BOSS_RESUME_HP := 0.8        # 恢复到此比例后重新出击
 const KNOCKBACK_DIST := 70.0       # 败方被击退的距离（像素）
 const DRAW_KNOCKBACK := 35.0       # 平局时双方各自后退的距离
 const DURABILITY_BY_TYPE := {"hq": 100, "fort": 60}  # 节点未写 durability 时的默认值；普通据点没有耐久
@@ -64,6 +70,7 @@ var edges: Array = []
 var squads: Array = []
 var time: float = 0.0
 var pending_encounter: Array = [] # [我方小队, 敌方小队]
+var pending_first_strike: int = -1 # 本次遭遇获得先制攻击的阵营（对方处于待机）；-1 = 无
 var game_over: bool = false
 var winner: int = -1              # 0 我方胜 / 1 敌方胜
 var ai_enabled: bool = true       # 测试时可关闭敌方 AI
@@ -130,6 +137,9 @@ func load_campaign(campaign_path: String, classes_path: String, player_squads: A
 		sq.team = int(sd.get("team", 0))
 		sq.color = Color.from_string(str(sd.get("color", "#ffffff")), Color.WHITE)
 		sq.ai = sd.get("ai", {})
+		if bool(sq.ai.get("boss", false)):
+			sq.max_morale = int(sq.ai.get("morale", 100))
+			sq.morale = float(sq.max_morale)
 		sq.home = str(sd.get("start", ""))
 		if not nodes.has(sq.home):
 			push_error("小队 %s 的起点不存在" % sq.id)
@@ -184,7 +194,9 @@ func objective_text() -> String:
 			return "坚守大本营 %d 秒（剩余 %d 秒）" % [int(objective.get("time", 0)), maxi(0, int(ceil(float(objective.get("time", 0)) - time)))]
 		"defeat_boss":
 			var b = squad_by_id(str(objective.get("squad", "")))
-			return "击败敌方首领「%s」" % (b.name if b != null else "?")
+			if b == null:
+				return "击败敌方首领"
+			return "击败敌方首领「%s」（士气 %d/%d）" % [b.name, int(ceil(b.morale)), b.max_morale]
 	return "攻陷敌方大本营「%s」" % (nodes[hq_of(1)]["name"] if hq_of(1) != "" else "?")
 
 
@@ -418,6 +430,7 @@ func update(delta: float) -> Array:
 			sq.recover_time = maxf(0.0, sq.recover_time - delta)
 			if sq.recover_time <= 0.0:
 				sq.stunned = false
+				sq.waiting = false
 	_ai_timer -= delta
 	if _ai_timer <= 0.0 and ai_enabled:
 		_ai_timer = AI_INTERVAL
@@ -432,6 +445,7 @@ func update(delta: float) -> Array:
 	_update_bases(delta, ev)
 	_update_durability(delta)
 	_recover(delta)
+	_update_morale(delta)
 	_income(delta, ev)
 	if str(objective.get("type", "")) == "defend" and time >= float(objective.get("time", 0)):
 		_end_game(0, ev, "坚守了 %d 秒，援军赶到" % int(objective.get("time", 0)))
@@ -471,15 +485,28 @@ func _move(sq, delta: float) -> void:
 
 func _check_encounters(ev: Array) -> void:
 	for a in living_squads(0):
-		if a.is_recovering():
-			continue
 		for b in living_squads(1):
-			if b.is_recovering():
+			if not can_engage(a, b) or a.pos.distance_to(b.pos) >= ENCOUNTER_DIST:
 				continue
-			if a.pos.distance_to(b.pos) < ENCOUNTER_DIST:
-				pending_encounter = [a, b]
-				ev.append({"type": "encounter", "text": "%s 与 %s 遭遇！" % [a.name, b.name]})
-				return
+			pending_encounter = [a, b]
+			pending_first_strike = -1
+			var txt := "%s 与 %s 遭遇！" % [a.name, b.name]
+			if b.waiting:
+				pending_first_strike = 0
+				txt += "（%s 正在待机，%s 先制攻击！）" % [b.name, a.name]
+			elif a.waiting:
+				pending_first_strike = 1
+				txt += "（%s 正在待机，%s 先制攻击！）" % [a.name, b.name]
+			ev.append({"type": "encounter", "first_strike": pending_first_strike, "text": txt})
+			return
+
+
+## 两支敌对小队能否交战：整备中（胜方）的不行；双方都在待机也不行；
+## 一方待机、另一方自由时可以（自由的一方先制攻击）。
+func can_engage(a, b) -> bool:
+	if (a.is_recovering() and not a.waiting) or (b.is_recovering() and not b.waiting):
+		return false
+	return not (a.waiting and b.waiting)
 
 
 func _update_bases(delta: float, ev: Array) -> void:
@@ -552,11 +579,24 @@ func _recover(delta: float) -> void:
 			sq.regen_timer += delta
 			while sq.regen_timer >= 1.0:
 				sq.regen_timer -= 1.0
+				var boss: bool = sq.max_morale > 0
 				for u in sq.units:
-					u.hp = mini(u.max_hp, u.hp + int(ceil(u.max_hp * BASE_HP_REGEN)))
+					if boss and not u.is_alive():
+						continue  # 首领部队倒下的成员在本场任务中不会复活
+					u.hp = mini(u.max_hp, u.hp + int(ceil(u.max_hp * (BOSS_HP_REGEN if boss else BASE_HP_REGEN))))
 		else:
 			sq.regen_timer = 0.0
 			sq.stamina = minf(100.0, sq.stamina + STAMINA_IDLE_REGEN * delta)
+
+
+## 首领只有静止停在己方据点上时才缓慢恢复士气
+func _update_morale(delta: float) -> void:
+	for sq in squads:
+		if not sq.alive or sq.max_morale <= 0 or sq.morale >= sq.max_morale:
+			continue
+		var id := node_of(sq)
+		if id != "" and is_capturable(id) and nodes[id]["owner"] == sq.team:
+			sq.morale = minf(float(sq.max_morale), sq.morale + BOSS_MORALE_REGEN * delta)
 
 
 func _claim_reward(n: Dictionary, ev: Array) -> void:
@@ -591,6 +631,7 @@ func create_battle(a, b):
 	var e := BattleEngine.new()
 	e.setup_with_units(skills_db, passives_db, classes_db, a.units + b.units, [a.name, b.name])
 	e.battle_seed = BattleEngine.DEFAULT_SEED + int(time * 10.0)  # 每场遭遇不同但可复现
+	e.first_strike_team = pending_first_strike
 	e.reset_battle(false)
 	return e
 
@@ -620,13 +661,23 @@ func apply_battle_result(a, b, battle_winner: int) -> Array:
 			ev.append({"type": "income", "gold": BATTLE_GOLD, "text": "战斗胜利，战利金 +%d" % BATTLE_GOLD})
 		else:
 			battles_lost += 1
-	# 首领被击败（战败）即视为讨伐成功
-	var boss_down := false
-	if loser == b and battle_winner == 0 and bool(b.ai.get("boss", false)):
-		b.alive = false
-		b.path = []
-		boss_down = true
-		ev.append({"type": "destroyed", "squad": b.id, "text": "敌方首领「%s」被击败！" % b.name})
+	pending_first_strike = -1
+	# 首领：每次战败打击士气（胜得越漂亮打击越大），士气归零或全员倒下才算被击败
+	var boss_reason := ""
+	if battle_winner == 0 and b.max_morale > 0 and b.living_count() > 0:
+		var w_ratio: float = a.hp_ratio()
+		var margin := clampf(w_ratio - b.hp_ratio(), 0.0, 1.0)
+		var loss := maxi(BOSS_MORALE_MIN_LOSS, int(round((20.0 + 60.0 * margin) * (0.5 + 0.5 * w_ratio))))
+		b.morale = maxf(0.0, b.morale - loss)
+		ev.append({"type": "morale", "squad": b.id, "loss": loss,
+			"text": "首领「%s」士气 -%d（剩余 %d/%d）" % [b.name, loss, int(ceil(b.morale)), b.max_morale]})
+		if b.morale <= 0.0:
+			b.alive = false
+			b.path = []
+			boss_reason = "首领「%s」士气崩溃，率残部投降" % b.name
+			ev.append({"type": "destroyed", "squad": b.id, "text": boss_reason})
+	if b.max_morale > 0 and b.living_count() == 0:
+		boss_reason = "首领「%s」的部队全员倒下" % b.name
 	for sq in [a, b]:
 		if sq.living_count() == 0:
 			sq.alive = false
@@ -646,11 +697,21 @@ func apply_battle_result(a, b, battle_winner: int) -> Array:
 			_siege_hit(held, winner_sq, loser, ev)
 		else:
 			_knockback(loser, winner_sq, KNOCKBACK_DIST, ev)
+	# 战后状态：平局双方整备；否则胜方短暂整备，败方进入待机（可被攻击，对方先制）
 	for sq in [a, b]:
-		if sq.alive:
-			sq.recover_time = maxf(sq.recover_time, RECOVER_TIME)
-	if boss_down and str(objective.get("type", "")) == "defeat_boss" and str(objective.get("squad", "")) == b.id:
-		_end_game(0, ev, "首领「%s」已被讨伐" % b.name)
+		if not sq.alive:
+			continue
+		if battle_winner == -1 or sq == winner_sq:
+			sq.recover_time = RECOVER_TIME
+			sq.waiting = false
+			sq.stunned = false
+		else:
+			sq.recover_time = WAIT_TIME
+			sq.waiting = true
+	if str(objective.get("type", "")) == "defeat_boss":
+		var boss = squad_by_id(str(objective.get("squad", "")))
+		if boss != null and not boss.alive:
+			_end_game(0, ev, boss_reason if boss_reason != "" else "首领「%s」已被讨伐" % boss.name)
 	for t in [0, 1]:
 		if living_squads(t).is_empty():
 			_end_game(1 - t, ev, "%s 的所有小队都已覆没" % ("我方" if t == 0 else "敌方"))
@@ -801,8 +862,20 @@ func _run_ai() -> void:
 	for sq in living_squads(1):
 		if sq.is_recovering():
 			continue
+		if sq.max_morale > 0:
+			# 首领：在场成员 HP 低于一半时回据点休整，恢复到 80% 再出击；否则照常迎击
+			var lr: float = sq.living_hp_ratio()
+			if lr < BOSS_RETREAT_HP:
+				sq.resting = true
+			elif lr >= BOSS_RESUME_HP:
+				sq.resting = false
+			if sq.resting:
+				var base: String = sq.home if nodes.has(sq.home) and nodes[sq.home]["owner"] == sq.team else nearest_friendly_node(sq)
+				if base != "" and node_of(sq) != base and sq.destination() != base:
+					order_move(sq, base)
+				continue
 		# 残血：撤回最近的己方据点休整（已在己方据点上则原地休整）
-		if sq.hp_ratio() < AI_RETREAT_HP:
+		elif sq.hp_ratio() < AI_RETREAT_HP:
 			var here := node_of(sq)
 			if here != "" and is_capturable(here) and nodes[here]["owner"] == 1:
 				continue

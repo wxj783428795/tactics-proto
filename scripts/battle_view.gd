@@ -350,6 +350,8 @@ func _refresh() -> void:
 			elif engine.winner == 1:
 				res = "败北……"
 			status_label.text = "【战斗结束】%s  %s" % [res, "点击「返回地图」" if is_map_mode() else "点击「重新开始」再来一局"]
+	if engine != null and engine.first_strike_team >= 0 and state != State.DONE:
+		status_label.text = "【先制攻击！%s 第一轮全员抢先行动】 " % ("我方" if engine.first_strike_team == 0 else "敌方") + status_label.text
 
 
 func _update_highlights() -> void:

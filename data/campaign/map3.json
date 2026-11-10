@@ -382,7 +382,8 @@
    "ai": {
     "mode": "defend",
     "radius": 170,
-    "boss": true
+    "boss": true,
+    "morale": 100
    },
    "units": [
     {
@@ -395,28 +396,28 @@
     {
      "name": "灰烬亲卫",
      "class": "bulwark",
-     "level": 8,
+     "level": 7,
      "row": 0,
      "col": 0
     },
     {
      "name": "灰烬术士",
      "class": "pyrosage",
-     "level": 8,
+     "level": 7,
      "row": 1,
      "col": 1
     },
     {
      "name": "灰烬司祭",
      "class": "dawnpriest",
-     "level": 8,
+     "level": 7,
      "row": 1,
      "col": 0
     },
     {
      "name": "灰烬射手",
      "class": "stargazer",
-     "level": 8,
+     "level": 7,
      "row": 1,
      "col": 2
     }

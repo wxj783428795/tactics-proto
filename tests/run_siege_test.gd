@@ -126,7 +126,8 @@ func _initialize() -> void:
 	check(ks.pos == ks_before, "胜方原地不动")
 
 	print("=== 4. 战后整备：双方原地停留，不会和任何人遭遇 ===")
-	check(kd.is_recovering() and ks.is_recovering() and absf(kd.recover_time - MapModel.RECOVER_TIME) < 0.01, "双方进入 %.0f 秒整备" % MapModel.RECOVER_TIME)
+	check(ks.is_recovering() and not ks.waiting and absf(ks.recover_time - MapModel.RECOVER_TIME) < 0.01, "胜方进入 %.1f 秒整备" % MapModel.RECOVER_TIME)
+	check(kd.waiting and absf(kd.recover_time - MapModel.WAIT_TIME) < 0.01, "败方进入 %.1f 秒待机" % MapModel.WAIT_TIME)
 	var wolf = k.squad_by_id("wolf")
 	place(k, wolf, "ford")  # 第三支小队直接站到敌人身上
 	wolf.pos = ks.pos
@@ -143,7 +144,10 @@ func _initialize() -> void:
 		k.update(0.1)
 	check(not ks.is_recovering() and not k.pending_encounter.is_empty(), "整备结束后可以再次遭遇")
 	k.pending_encounter = []
-	check(not kd.is_recovering() and kd.pos != p_before, "整备结束后继续退向来路")
+	wolf.pos = Vector2(-999, -999)
+	for i in 15:
+		k.update(0.1)
+	check(not kd.is_recovering() and not kd.waiting and kd.pos != p_before, "待机结束后继续退向来路")
 
 	print("=== 5. 击退：站在普通据点上战败，被推离据点 ===")
 	var n := new_model()

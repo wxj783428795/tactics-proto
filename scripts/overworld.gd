@@ -380,11 +380,16 @@ func _refresh_hud() -> void:
 	var lines := PackedStringArray()
 	lines.append("%s（%s）" % [selected.name, "我方" if selected.team == 0 else "敌方"])
 	if selected.is_recovering():
-		where += "　%s %.1f 秒" % ["硬直" if selected.stunned else "战后整备", selected.recover_time]
+		var st := "战后整备"
+		if selected.waiting:
+			st = "硬直待机（可被先制攻击）" if selected.stunned else "战败待机（可被先制攻击）"
+		where += "　%s %.1f 秒" % [st, selected.recover_time]
 	lines.append(where)
 	lines.append("体力 %d / 100%s" % [int(selected.stamina), "（疲劳：移动减速）" if selected.stamina <= 0.0 else ""])
 	for u in selected.units:
 		lines.append("%s %s Lv%d（%s·%s） HP %d/%d" % ["×" if not u.is_alive() else "·", u.display_name, u.level, u.job_name, u.row_name(), u.hp, u.max_hp])
 	if selected.team == 1:
 		lines.append("AI：%s%s" % [str(selected.ai.get("mode", "")), "（首领）" if bool(selected.ai.get("boss", false)) else ""])
+		if selected.max_morale > 0:
+			lines.append("士气 %d / %d%s" % [int(ceil(selected.morale)), selected.max_morale, "（回据点休整中）" if selected.resting else ""])
 	info.text = "\n".join(lines)

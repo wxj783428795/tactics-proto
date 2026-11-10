@@ -100,8 +100,8 @@ map3 = {
           [("黑锚甲", "cavalry", 6), ("黑锚乙", "assassin", 6), ("黑锚丙", "mage", 6)]),
     squad("bridge_guard", "断桥守军", "#922b21", "r4", {"mode": "defend", "radius": 130},
           [("断桥甲", "warden", 6), ("断桥乙", "swordsman", 6), ("断桥丙", "mage", 6), ("断桥丁", "cleric", 6)]),
-    squad("boss", "灰烬团长·索格", "#5d0f0f", "tower", {"mode": "defend", "radius": 170, "boss": True},
-          [("索格", "blademaster", 9), ("灰烬亲卫", "bulwark", 8), ("灰烬术士", "pyrosage", 8), ("灰烬司祭", "dawnpriest", 8), ("灰烬射手", "stargazer", 8)]),
+    squad("boss", "灰烬团长·索格", "#5d0f0f", "tower", {"mode": "defend", "radius": 170, "boss": True, "morale": 100},
+          [("索格", "blademaster", 9), ("灰烬亲卫", "bulwark", 7), ("灰烬术士", "pyrosage", 7), ("灰烬司祭", "dawnpriest", 7), ("灰烬射手", "stargazer", 7)]),
   ],
 }
 
@@ -186,8 +186,8 @@ missions = {
       ),
     },
     {
-      "id": "m3", "goal": "击败灰烬团长·索格", "title": "第三章　灰塔决战", "map": "res://data/campaign/map3.json",
-      "briefing": "灰烬团长索格坐镇灰塔，身边有转职后的精锐亲卫。\n击败索格的小队即可获胜（攻下灰塔也算胜利）。\n\n提示：铁门关有重兵把守，风语祠一带有鸦羽巡哨。建议先在营地为成员转职、整理装备与战术。",
+      "id": "m3", "goal": "击败灰烬团长·索格（士气归零或全员倒下）", "title": "第三章　灰塔决战", "map": "res://data/campaign/map3.json",
+      "briefing": "灰烬团长索格坐镇灰塔，身边有转职后的精锐亲卫。\n索格久经沙场，一场败仗打不垮他：每次战胜他的小队都会削减其「士气」（胜得越干净、我方剩余兵力越多，削得越狠），士气归零或其小队全员倒下即为讨伐成功（攻下灰塔也算胜利）。\n他的伤势会一直带着，只有回到灰塔里才会缓慢恢复，倒下的亲卫在本战中不会再站起来；士气也只在塔中休整时慢慢回升，别给他喘息的时间。\n战败的小队会原地「待机」片刻，此时被敌人攻击会遭到先制攻击——这对双方都一样。\n\n提示：铁门关有重兵把守，风语祠一带有鸦羽巡哨。建议先在营地为成员转职、整理装备与战术。",
       "difficulty": "★★★",
       "reward": {"gold": 500, "items": ["oathkeeper_ring", "northwall_tower"]},
       "join": [],
