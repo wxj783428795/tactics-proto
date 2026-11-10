@@ -66,12 +66,19 @@ func _initialize() -> void:
 	check(ev.any(func(e): return e["type"] == "captured"), "产生占领事件：" + str(ev.filter(func(e): return e["type"] == "captured").map(func(e): return e["text"])))
 	check(m.base_counts() == [2, 3, 3], "据点数更新为 %s" % str(m.base_counts()))
 	var u0 = dawn.units[0]
+	var u1 = dawn.units[1]
 	u0.hp = 10
+	u1.hp = 0  # 倒下的成员
 	var st0: float = dawn.stamina
 	m.update(1.0)
 	m.update(1.0)
-	check(u0.hp > 10 and dawn.stamina > st0, "己方据点内回复 HP（10→%d）与体力（%.1f→%.1f）" % [u0.hp, st0, dawn.stamina])
+	var per0 := int(ceil(u0.max_hp * m.BASE_HP_REGEN))
+	var per1 := int(ceil(u1.max_hp * m.BASE_HP_REGEN))
+	check(is_equal_approx(m.BASE_HP_REGEN, 0.02), "据点回复速度为每秒最大 HP 的 2%")
+	check(u0.hp == 10 + 2 * per0 and dawn.stamina > st0, "己方据点内 2 秒回复 HP（10→%d，每秒 +%d = ceil(%d×2%%)）与体力（%.1f→%.1f）" % [u0.hp, per0, u0.max_hp, st0, dawn.stamina])
+	check(u1.hp == 2 * per1, "倒下的成员在据点内被救起（0→%d）" % u1.hp)
 	u0.hp = u0.max_hp
+	u1.hp = u1.max_hp
 
 	print("=== 地图 4：争夺中的据点不会被占领 ===")
 	var m4 := new_model()

@@ -143,7 +143,8 @@ func _initialize() -> void:
 	check(boss.units[1].hp == 0, "倒下的亲卫不会复活")
 	var u0 = boss.units[0]
 	var gain: int = u0.hp - int(hp0[0])
-	check(gain > 0 and gain <= 10 * int(ceil(u0.max_hp * MapModel.BOSS_HP_REGEN)), "首领 10 秒只恢复 %d HP（上限 %d，普通小队为 %d）" % [gain, 10 * int(ceil(u0.max_hp * MapModel.BOSS_HP_REGEN)), 10 * int(ceil(u0.max_hp * MapModel.BASE_HP_REGEN))])
+	check(gain > 0 and gain <= 10 * int(ceil(u0.max_hp * MapModel.BOSS_HP_REGEN)), "首领 10 秒只恢复 %d HP（上限 %d，每秒 2%%）" % [gain, 10 * int(ceil(u0.max_hp * MapModel.BOSS_HP_REGEN))])
+	check(MapModel.BOSS_HP_REGEN <= MapModel.BASE_HP_REGEN, "首领回复速度不高于普通小队（%.0f%% / %.0f%%）" % [MapModel.BOSS_HP_REGEN * 100, MapModel.BASE_HP_REGEN * 100])
 
 	print("=== 6. 先制攻击：第一轮攻方全员先行动 ===")
 	m = ch3()

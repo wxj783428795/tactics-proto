@@ -190,7 +190,7 @@ func _initialize() -> void:
 	d.update(1.0)
 	d.update(1.0)
 	d.pending_encounter = []
-	check(da.units[0].hp > 10, "守军 HP 10 → %d" % da.units[0].hp)
+	check(da.units[0].hp == 10 + 2 * int(ceil(da.units[0].max_hp * MapModel.BASE_HP_REGEN)), "守军 2 秒 HP 10 → %d（每秒 2%%）" % da.units[0].hp)
 
 	print("=== 8. 耐久归零：守军溃退，据点可被占领 ===")
 	da.recover_time = 0.0
