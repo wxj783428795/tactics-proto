@@ -1,0 +1,478 @@
+{
+ "_comment": "大地图战役数据。nodes: type=road(路口)/base(据点)/fort(要塞)/hq(大本营)，owner: -1中立 0我方 1敌方。squads.ai.mode: defend(驻守，发现我方靠近则迎击)/patrol(按 route 巡逻)/advance(进攻最近的非己方据点)。单位可省略 tactics 以使用职业默认战术。 advance 可选 targets：按顺序进攻列表中第一个非己方据点；delay：出发前等待秒数。",
+ "nodes": [
+  {
+   "id": "P_HQ",
+   "name": "晨星营地",
+   "type": "hq",
+   "owner": 0,
+   "pos": [
+    70,
+    330
+   ],
+   "durability": 100
+  },
+  {
+   "id": "r1",
+   "type": "road",
+   "pos": [
+    190,
+    170
+   ]
+  },
+  {
+   "id": "r2",
+   "type": "road",
+   "pos": [
+    190,
+    500
+   ]
+  },
+  {
+   "id": "north_village",
+   "name": "北岭村",
+   "type": "base",
+   "owner": -1,
+   "pos": [
+    320,
+    110
+   ]
+  },
+  {
+   "id": "ford",
+   "name": "白石渡",
+   "type": "base",
+   "owner": -1,
+   "pos": [
+    320,
+    330
+   ]
+  },
+  {
+   "id": "reed_fort",
+   "name": "苇泽堡",
+   "type": "fort",
+   "owner": -1,
+   "pos": [
+    320,
+    560
+   ],
+   "durability": 60
+  },
+  {
+   "id": "r3",
+   "type": "road",
+   "pos": [
+    460,
+    200
+   ]
+  },
+  {
+   "id": "r4",
+   "type": "road",
+   "pos": [
+    460,
+    470
+   ]
+  },
+  {
+   "id": "windmill",
+   "name": "风车丘",
+   "type": "base",
+   "owner": -1,
+   "pos": [
+    545,
+    330
+   ]
+  },
+  {
+   "id": "crow_tower",
+   "name": "鸦巢塔",
+   "type": "base",
+   "owner": 1,
+   "pos": [
+    640,
+    110
+   ]
+  },
+  {
+   "id": "red_fort",
+   "name": "赤沙堡",
+   "type": "fort",
+   "owner": 1,
+   "pos": [
+    640,
+    560
+   ],
+   "durability": 60
+  },
+  {
+   "id": "r5",
+   "type": "road",
+   "pos": [
+    740,
+    230
+   ]
+  },
+  {
+   "id": "r6",
+   "type": "road",
+   "pos": [
+    740,
+    440
+   ]
+  },
+  {
+   "id": "E_HQ",
+   "name": "灰烬要塞",
+   "type": "hq",
+   "owner": 1,
+   "pos": [
+    850,
+    330
+   ],
+   "durability": 100
+  }
+ ],
+ "edges": [
+  [
+   "P_HQ",
+   "r1"
+  ],
+  [
+   "P_HQ",
+   "r2"
+  ],
+  [
+   "P_HQ",
+   "ford"
+  ],
+  [
+   "r1",
+   "north_village"
+  ],
+  [
+   "r2",
+   "reed_fort"
+  ],
+  [
+   "north_village",
+   "ford"
+  ],
+  [
+   "ford",
+   "reed_fort"
+  ],
+  [
+   "north_village",
+   "r3"
+  ],
+  [
+   "ford",
+   "windmill"
+  ],
+  [
+   "reed_fort",
+   "r4"
+  ],
+  [
+   "r3",
+   "windmill"
+  ],
+  [
+   "r4",
+   "windmill"
+  ],
+  [
+   "r3",
+   "crow_tower"
+  ],
+  [
+   "r4",
+   "red_fort"
+  ],
+  [
+   "windmill",
+   "r5"
+  ],
+  [
+   "windmill",
+   "r6"
+  ],
+  [
+   "crow_tower",
+   "r5"
+  ],
+  [
+   "red_fort",
+   "r6"
+  ],
+  [
+   "r5",
+   "E_HQ"
+  ],
+  [
+   "r6",
+   "E_HQ"
+  ]
+ ],
+ "squads": [
+  {
+   "id": "dawn",
+   "name": "晨星小队",
+   "team": 0,
+   "color": "#4aa3ff",
+   "start": "P_HQ",
+   "units": [
+    {
+     "name": "凯岚",
+     "class": "swordsman",
+     "row": 0,
+     "col": 0
+    },
+    {
+     "name": "铎岩",
+     "class": "guardian",
+     "row": 0,
+     "col": 1
+    },
+    {
+     "name": "青翎",
+     "class": "archer",
+     "row": 1,
+     "col": 0
+    },
+    {
+     "name": "汐音",
+     "class": "cleric",
+     "row": 1,
+     "col": 1
+    },
+    {
+     "name": "焰朔",
+     "class": "mage",
+     "row": 1,
+     "col": 2
+    }
+   ]
+  },
+  {
+   "id": "wolf",
+   "name": "苍狼小队",
+   "team": 0,
+   "color": "#5fd3c0",
+   "start": "P_HQ",
+   "units": [
+    {
+     "name": "夜棠",
+     "class": "assassin",
+     "row": 0,
+     "col": 0
+    },
+    {
+     "name": "赫照",
+     "class": "cavalry",
+     "row": 0,
+     "col": 1
+    },
+    {
+     "name": "寒栎",
+     "class": "swordsman",
+     "row": 0,
+     "col": 2
+    },
+    {
+     "name": "绯鸢",
+     "class": "archer",
+     "row": 1,
+     "col": 1
+    }
+   ]
+  },
+  {
+   "id": "silver",
+   "name": "银枝小队",
+   "team": 0,
+   "color": "#b9c7ff",
+   "start": "P_HQ",
+   "units": [
+    {
+     "name": "晏戈",
+     "class": "spearman",
+     "row": 0,
+     "col": 0
+    },
+    {
+     "name": "岳衡",
+     "class": "warden",
+     "row": 0,
+     "col": 1
+    },
+    {
+     "name": "澜歌",
+     "class": "mage",
+     "row": 1,
+     "col": 0
+    },
+    {
+     "name": "落笙",
+     "class": "bard",
+     "row": 1,
+     "col": 1
+    },
+    {
+     "name": "柚铃",
+     "class": "cleric",
+     "row": 1,
+     "col": 2
+    }
+   ]
+  },
+  {
+   "id": "ash",
+   "name": "灰烬佣兵团",
+   "team": 1,
+   "color": "#ff6b5a",
+   "start": "E_HQ",
+   "ai": {
+    "mode": "defend",
+    "radius": 170
+   },
+   "units": [
+    {
+     "name": "芮卡",
+     "class": "swordsman",
+     "row": 0,
+     "col": 0
+    },
+    {
+     "name": "巴拓",
+     "class": "guardian",
+     "row": 0,
+     "col": 1
+    },
+    {
+     "name": "莫珂",
+     "class": "spearman",
+     "row": 0,
+     "col": 2
+    },
+    {
+     "name": "薇丝",
+     "class": "archer",
+     "row": 1,
+     "col": 0
+    },
+    {
+     "name": "奥黎",
+     "class": "cleric",
+     "row": 1,
+     "col": 2
+    }
+   ]
+  },
+  {
+   "id": "crow",
+   "name": "鸦羽斥候",
+   "team": 1,
+   "color": "#c77dff",
+   "start": "crow_tower",
+   "ai": {
+    "mode": "patrol",
+    "route": [
+     "crow_tower",
+     "r3",
+     "windmill",
+     "r5"
+    ]
+   },
+   "units": [
+    {
+     "name": "索恩",
+     "class": "skywing",
+     "row": 0,
+     "col": 1
+    },
+    {
+     "name": "提拉",
+     "class": "archer",
+     "row": 1,
+     "col": 0
+    },
+    {
+     "name": "葛文",
+     "class": "bard",
+     "row": 1,
+     "col": 2
+    }
+   ]
+  },
+  {
+   "id": "sand",
+   "name": "赤沙突击队",
+   "team": 1,
+   "color": "#ffa94d",
+   "start": "red_fort",
+   "ai": {
+    "mode": "advance",
+    "delay": 60,
+    "targets": [
+     "windmill",
+     "ford",
+     "P_HQ"
+    ]
+   },
+   "units": [
+    {
+     "name": "洛克",
+     "class": "cavalry",
+     "row": 0,
+     "col": 0
+    },
+    {
+     "name": "戈涅",
+     "class": "cavalry",
+     "row": 0,
+     "col": 2
+    },
+    {
+     "name": "伊芙",
+     "class": "mage",
+     "row": 1,
+     "col": 1
+    }
+   ]
+  },
+  {
+   "id": "thorn",
+   "name": "铁棘守备队",
+   "team": 1,
+   "color": "#e64980",
+   "start": "red_fort",
+   "ai": {
+    "mode": "defend",
+    "radius": 120
+   },
+   "units": [
+    {
+     "name": "穆兰",
+     "class": "warden",
+     "row": 0,
+     "col": 1
+    },
+    {
+     "name": "费恩",
+     "class": "archer",
+     "row": 1,
+     "col": 0
+    },
+    {
+     "name": "珂拉",
+     "class": "cleric",
+     "row": 1,
+     "col": 2
+    }
+   ]
+  }
+ ]
+}

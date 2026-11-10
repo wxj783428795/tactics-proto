@@ -1,0 +1,27 @@
+; Engine configuration file.
+; 原创战术原型 —— Godot 4.3+（Compatibility 渲染器，便于导出网页版）
+
+config_version=5
+
+[application]
+
+config/name="Tactics Proto (晨星战旗原型)"
+run/main_scene="res://scenes/title.tscn"
+config/features=PackedStringArray("4.3", "GL Compatibility")
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=760
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[gui]
+
+theme/custom_font="res://assets/fonts/NotoSansSC-subset.otf"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true

@@ -1,0 +1,58 @@
+{
+ "recruits": [
+  {
+   "id": "r_hezhao",
+   "name": "赫照",
+   "class": "cavalry",
+   "level": 2,
+   "cost": 250,
+   "after": 0,
+   "desc": "退役的驿站骑手，熟悉平原上的每一条小路。"
+  },
+  {
+   "id": "r_yange",
+   "name": "晏戈",
+   "class": "spearman",
+   "level": 2,
+   "cost": 220,
+   "after": 0,
+   "desc": "渔村出身的枪兵，擅长对付骑兵。"
+  },
+  {
+   "id": "r_youling",
+   "name": "柚铃",
+   "class": "cleric",
+   "level": 2,
+   "cost": 200,
+   "after": 0,
+   "desc": "草药铺的学徒，治疗手法稳当。"
+  },
+  {
+   "id": "r_lange",
+   "name": "澜歌",
+   "class": "mage",
+   "level": 3,
+   "cost": 320,
+   "after": 1,
+   "desc": "流浪的术士，据说烧掉过半座书院。"
+  },
+  {
+   "id": "r_jichuan",
+   "name": "霁川",
+   "class": "skywing",
+   "level": 3,
+   "cost": 320,
+   "after": 1,
+   "desc": "驯养巨隼的山民，能越过敌人的前排。"
+  },
+  {
+   "id": "r_shiling",
+   "name": "石苓",
+   "class": "guardian",
+   "level": 4,
+   "cost": 400,
+   "after": 2,
+   "desc": "采石场的工头，一个人能扛起一扇城门。"
+  }
+ ]
+}

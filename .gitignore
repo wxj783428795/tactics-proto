@@ -1,0 +1,10 @@
+# Godot 编辑器缓存与导入产物
+.godot/
+# 本地导出（网页版由 GitHub Actions 构建并发布）
+build/
+*.tmp
+*.translation
+# 系统 / 编辑器杂项
+.DS_Store
+Thumbs.db
+*.swp

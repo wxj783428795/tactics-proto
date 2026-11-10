@@ -1,0 +1,152 @@
+{
+ "_comment": "装备数据。slot: weapon/armor/accessory；stats 为固定加值(hp/atk/def/spd/crit/eva/ep/gp)；start_effects 为战斗开始时自带的状态。",
+ "items": {
+  "greysteel_knife": {
+   "name": "灰钢短刃",
+   "slot": "weapon",
+   "stats": {
+    "atk": 3
+   },
+   "desc": "攻击+3"
+  },
+  "tidemark_axe": {
+   "name": "潮纹战斧",
+   "slot": "weapon",
+   "stats": {
+    "atk": 6,
+    "spd": -1
+   },
+   "desc": "攻击+6 速度-1"
+  },
+  "glowstone_staff": {
+   "name": "萤石法杖",
+   "slot": "weapon",
+   "stats": {
+    "atk": 4,
+    "crit": 5
+   },
+   "desc": "攻击+4 会心+5%"
+  },
+  "singing_bow": {
+   "name": "鸣羽长弓",
+   "slot": "weapon",
+   "stats": {
+    "atk": 4,
+    "spd": 1
+   },
+   "desc": "攻击+4 速度+1"
+  },
+  "frostspine_pike": {
+   "name": "霜脊长枪",
+   "slot": "weapon",
+   "stats": {
+    "atk": 5,
+    "def": 1
+   },
+   "desc": "攻击+5 防御+1"
+  },
+  "ember_dagger": {
+   "name": "余烬匕首",
+   "slot": "weapon",
+   "stats": {
+    "atk": 2,
+    "crit": 15
+   },
+   "desc": "攻击+2 会心+15%"
+  },
+  "wayfarer_leather": {
+   "name": "旅人皮甲",
+   "slot": "armor",
+   "stats": {
+    "def": 2,
+    "hp": 5
+   },
+   "desc": "防御+2 HP+5"
+  },
+  "riveted_mail": {
+   "name": "铆钉链甲",
+   "slot": "armor",
+   "stats": {
+    "def": 5,
+    "spd": -1
+   },
+   "desc": "防御+5 速度-1"
+  },
+  "northwall_tower": {
+   "name": "北垣塔盾",
+   "slot": "armor",
+   "stats": {
+    "def": 7,
+    "hp": 10,
+    "spd": -2
+   },
+   "desc": "防御+7 HP+10 速度-2"
+  },
+  "windrunner_cloak": {
+   "name": "风行斗篷",
+   "slot": "armor",
+   "stats": {
+    "def": 1,
+    "eva": 10
+   },
+   "desc": "防御+1 闪避+10%"
+  },
+  "votive_robe": {
+   "name": "祈愿法袍",
+   "slot": "armor",
+   "stats": {
+    "def": 2,
+    "hp": 10
+   },
+   "desc": "防御+2 HP+10"
+  },
+  "gale_plume": {
+   "name": "疾风羽饰",
+   "slot": "accessory",
+   "stats": {
+    "spd": 3
+   },
+   "desc": "速度+3"
+  },
+  "amber_locket": {
+   "name": "琥珀心坠",
+   "slot": "accessory",
+   "stats": {
+    "hp": 15
+   },
+   "desc": "HP+15"
+  },
+  "dawnstar_badge": {
+   "name": "晨星徽章",
+   "slot": "accessory",
+   "stats": {
+    "ep": 1
+   },
+   "desc": "锐气+1（每场多行动一次）"
+  },
+  "oathkeeper_ring": {
+   "name": "守誓指环",
+   "slot": "accessory",
+   "stats": {
+    "gp": 1,
+    "def": 1
+   },
+   "desc": "守势+1 防御+1"
+  },
+  "wardrum_charm": {
+   "name": "战鼓护符",
+   "slot": "accessory",
+   "stats": {},
+   "start_effects": [
+    {
+     "id": "war_drum",
+     "name": "战意",
+     "stat": "atk",
+     "amount": 0.15,
+     "turns": 2
+    }
+   ],
+   "desc": "战斗开始时攻击+15%（2轮）"
+  }
+ }
+}

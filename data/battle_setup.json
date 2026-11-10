@@ -1,0 +1,170 @@
+{
+ "_comment": "独立战斗配置。row: 0=前排 1=后排；col: 0~2。tactics 为从上到下的优先级列表，省略时使用职业默认战术（classes.json 的 default_tactics）。",
+ "squads": [
+  {
+   "team": 0,
+   "name": "晨星小队",
+   "units": [
+    {
+     "name": "凯岚",
+     "class": "swordsman",
+     "row": 0,
+     "col": 0,
+     "tactics": [
+      {
+       "if": "enemy_hp_below",
+       "value": 0.4,
+       "skill": "twin_slash",
+       "pick": "lowest_hp"
+      },
+      {
+       "if": "always",
+       "skill": "slash",
+       "pick": "lowest_hp"
+      }
+     ]
+    },
+    {
+     "name": "铎岩",
+     "class": "spearman",
+     "row": 0,
+     "col": 1
+    },
+    {
+     "name": "夜棠",
+     "class": "assassin",
+     "row": 0,
+     "col": 2
+    },
+    {
+     "name": "青翎",
+     "class": "archer",
+     "row": 1,
+     "col": 0,
+     "tactics": [
+      {
+       "if": "enemy_class",
+       "value": "mage",
+       "skill": "piercing_shot"
+      },
+      {
+       "if": "enemy_class",
+       "value": "cleric",
+       "skill": "piercing_shot"
+      },
+      {
+       "if": "target_has_tag",
+       "value": "flying",
+       "skill": "arrow"
+      },
+      {
+       "if": "always",
+       "skill": "arrow",
+       "pick": "lowest_hp_ratio"
+      }
+     ]
+    },
+    {
+     "name": "汐音",
+     "class": "cleric",
+     "row": 1,
+     "col": 1,
+     "tactics": [
+      {
+       "if": "allies_hurt_at_least",
+       "value": 3,
+       "skill": "mend_all"
+      },
+      {
+       "if": "ally_hp_below",
+       "value": 0.5,
+       "skill": "mend",
+       "pick": "lowest_hp_ratio"
+      },
+      {
+       "if": "ally_hp_below",
+       "value": 0.85,
+       "skill": "mend",
+       "pick": "lowest_hp_ratio"
+      }
+     ]
+    },
+    {
+     "name": "落笙",
+     "class": "bard",
+     "row": 1,
+     "col": 2
+    }
+   ]
+  },
+  {
+   "team": 1,
+   "name": "灰烬佣兵团",
+   "units": [
+    {
+     "name": "佣兵·芮卡",
+     "class": "swordsman",
+     "row": 0,
+     "col": 0,
+     "tactics": [
+      {
+       "if": "self_hp_below",
+       "value": 0.5,
+       "skill": "twin_slash",
+       "pick": "lowest_hp"
+      },
+      {
+       "if": "always",
+       "skill": "slash",
+       "pick": "lowest_def"
+      }
+     ]
+    },
+    {
+     "name": "佣兵·巴拓",
+     "class": "warden",
+     "row": 0,
+     "col": 1
+    },
+    {
+     "name": "佣兵·莫珂",
+     "class": "cavalry",
+     "row": 0,
+     "col": 2
+    },
+    {
+     "name": "佣兵·薇丝",
+     "class": "skywing",
+     "row": 1,
+     "col": 0
+    },
+    {
+     "name": "佣兵·澄",
+     "class": "mage",
+     "row": 1,
+     "col": 1
+    },
+    {
+     "name": "佣兵·奥黎",
+     "class": "cleric",
+     "row": 1,
+     "col": 2,
+     "tactics": [
+      {
+       "if": "ally_hp_below",
+       "value": 0.6,
+       "skill": "mend",
+       "pick": "lowest_hp_ratio"
+      },
+      {
+       "if": "ally_hp_below",
+       "value": 0.85,
+       "skill": "mend",
+       "pick": "lowest_hp_ratio"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,91 @@
+# 推送到 main 时：下载 Godot 4.3 + 导出模板（缓存）→ 导入 → 跑无头测试 → 导出网页版（无线程）→ 发布到 GitHub Pages
+name: Deploy web build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.3"
+  GODOT_BIN: Godot_v4.3-stable_linux.x86_64
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot and export templates
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot
+            ~/.local/share/godot/export_templates/4.3.stable
+          key: godot-4.3-stable-web-nothreads-v1
+
+      - name: Download Godot 4.3 and web export templates
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          BASE=https://github.com/godotengine/godot/releases/download/4.3-stable
+          mkdir -p ~/godot ~/.local/share/godot/export_templates/4.3.stable
+          cd ~/godot
+          curl -fsSL -o godot.zip "$BASE/${GODOT_BIN}.zip"
+          unzip -q godot.zip && rm godot.zip
+          curl -fsSL -o templates.tpz "$BASE/Godot_v4.3-stable_export_templates.tpz"
+          unzip -q templates.tpz "templates/web_*" "templates/version.txt"
+          mv templates/* ~/.local/share/godot/export_templates/4.3.stable/
+          rm -rf templates templates.tpz
+          ls -la ~/godot ~/.local/share/godot/export_templates/4.3.stable
+
+      - name: Import project
+        run: |
+          mkdir -p build && touch build/.gdignore
+          # 第一次导入字体时可能打印无害的错误，再导入一次确保缓存完整
+          timeout 300 ~/godot/$GODOT_BIN --headless --path . --import || true
+          timeout 300 ~/godot/$GODOT_BIN --headless --path . --import
+
+      - name: Run headless tests
+        run: |
+          set -o pipefail
+          for t in battle map class campaign siege pursuit; do
+            echo "::group::run_${t}_test"
+            timeout 300 ~/godot/$GODOT_BIN --headless --path . --script res://tests/run_${t}_test.gd 2>&1 | tee /tmp/t.txt
+            echo "::endgroup::"
+            if grep -q "\[FAIL\]\|SCRIPT ERROR" /tmp/t.txt; then echo "run_${t}_test failed"; exit 1; fi
+          done
+
+      - name: Export web (threads off)
+        run: |
+          mkdir -p build/web
+          timeout 300 ~/godot/$GODOT_BIN --headless --path . --export-release Web build/web/index.html
+          test -s build/web/index.pck && test -s build/web/index.wasm
+          touch build/web/.nojekyll
+          ls -la build/web
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

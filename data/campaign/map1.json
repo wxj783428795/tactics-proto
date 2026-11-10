@@ -1,0 +1,299 @@
+{
+ "name": "白石渡",
+ "objective": {
+  "type": "capture_hq"
+ },
+ "nodes": [
+  {
+   "id": "camp",
+   "name": "晨星营地",
+   "type": "hq",
+   "owner": 0,
+   "pos": [
+    80,
+    330
+   ],
+   "durability": 100
+  },
+  {
+   "id": "r1",
+   "name": "",
+   "type": "road",
+   "owner": -1,
+   "pos": [
+    200,
+    200
+   ]
+  },
+  {
+   "id": "r2",
+   "name": "",
+   "type": "road",
+   "owner": -1,
+   "pos": [
+    200,
+    470
+   ]
+  },
+  {
+   "id": "farm",
+   "name": "芦花农庄",
+   "type": "base",
+   "owner": -1,
+   "pos": [
+    330,
+    150
+   ],
+   "reward": {
+    "gold": 60
+   }
+  },
+  {
+   "id": "mill",
+   "name": "石磨坊",
+   "type": "base",
+   "owner": -1,
+   "pos": [
+    330,
+    510
+   ],
+   "reward": {
+    "items": [
+     "amber_locket"
+    ]
+   }
+  },
+  {
+   "id": "ford",
+   "name": "白石渡口",
+   "type": "fort",
+   "owner": 1,
+   "pos": [
+    470,
+    330
+   ],
+   "durability": 60,
+   "reward": {
+    "items": [
+     "greysteel_knife"
+    ]
+   }
+  },
+  {
+   "id": "r3",
+   "name": "",
+   "type": "road",
+   "owner": -1,
+   "pos": [
+    610,
+    200
+   ]
+  },
+  {
+   "id": "r4",
+   "name": "",
+   "type": "road",
+   "owner": -1,
+   "pos": [
+    610,
+    470
+   ]
+  },
+  {
+   "id": "watch",
+   "name": "望潮哨",
+   "type": "base",
+   "owner": 1,
+   "pos": [
+    730,
+    140
+   ],
+   "reward": {
+    "gold": 30,
+    "items": [
+     "ember_dagger"
+    ]
+   }
+  },
+  {
+   "id": "ehq",
+   "name": "渡口营寨",
+   "type": "hq",
+   "owner": 1,
+   "pos": [
+    840,
+    340
+   ],
+   "durability": 100
+  }
+ ],
+ "edges": [
+  [
+   "camp",
+   "r1"
+  ],
+  [
+   "camp",
+   "r2"
+  ],
+  [
+   "r1",
+   "farm"
+  ],
+  [
+   "r2",
+   "mill"
+  ],
+  [
+   "farm",
+   "ford"
+  ],
+  [
+   "mill",
+   "ford"
+  ],
+  [
+   "camp",
+   "ford"
+  ],
+  [
+   "ford",
+   "r3"
+  ],
+  [
+   "ford",
+   "r4"
+  ],
+  [
+   "r3",
+   "watch"
+  ],
+  [
+   "watch",
+   "ehq"
+  ],
+  [
+   "r4",
+   "ehq"
+  ],
+  [
+   "r3",
+   "ehq"
+  ]
+ ],
+ "squads": [
+  {
+   "id": "e_scout",
+   "name": "灰烬斥候",
+   "team": 1,
+   "color": "#c0392b",
+   "start": "ford",
+   "ai": {
+    "mode": "defend",
+    "radius": 140
+   },
+   "units": [
+    {
+     "name": "灰兵甲",
+     "class": "swordsman",
+     "level": 2,
+     "row": 0,
+     "col": 1
+    },
+    {
+     "name": "灰弓乙",
+     "class": "archer",
+     "level": 2,
+     "row": 1,
+     "col": 1
+    },
+    {
+     "name": "灰祷丙",
+     "class": "cleric",
+     "level": 2,
+     "row": 1,
+     "col": 0
+    }
+   ]
+  },
+  {
+   "id": "e_raid",
+   "name": "灰烬游骑",
+   "team": 1,
+   "color": "#e67e22",
+   "start": "watch",
+   "ai": {
+    "mode": "advance",
+    "delay": 45,
+    "targets": [
+     "farm",
+     "camp"
+    ]
+   },
+   "units": [
+    {
+     "name": "游骑甲",
+     "class": "cavalry",
+     "level": 2,
+     "row": 0,
+     "col": 1
+    },
+    {
+     "name": "游骑乙",
+     "class": "swordsman",
+     "level": 2,
+     "row": 0,
+     "col": 0
+    },
+    {
+     "name": "游骑丙",
+     "class": "archer",
+     "level": 2,
+     "row": 1,
+     "col": 1
+    }
+   ]
+  },
+  {
+   "id": "e_guard",
+   "name": "渡口守军",
+   "team": 1,
+   "color": "#8e2b2b",
+   "start": "ehq",
+   "ai": {
+    "mode": "defend",
+    "radius": 150
+   },
+   "units": [
+    {
+     "name": "守军甲",
+     "class": "guardian",
+     "level": 3,
+     "row": 0,
+     "col": 1
+    },
+    {
+     "name": "守军乙",
+     "class": "swordsman",
+     "level": 3,
+     "row": 0,
+     "col": 0
+    },
+    {
+     "name": "守军丙",
+     "class": "mage",
+     "level": 3,
+     "row": 1,
+     "col": 1
+    },
+    {
+     "name": "守军丁",
+     "class": "archer",
+     "level": 3,
+     "row": 1,
+     "col": 0
+    }
+   ]
+  }
+ ]
+}

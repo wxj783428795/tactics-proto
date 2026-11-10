@@ -1,0 +1,426 @@
+{
+ "name": "灰塔",
+ "objective": {
+  "type": "defeat_boss",
+  "squad": "boss"
+ },
+ "nodes": [
+  {
+   "id": "outpost",
+   "name": "晨星前哨",
+   "type": "hq",
+   "owner": 0,
+   "pos": [
+    70,
+    500
+   ],
+   "durability": 100
+  },
+  {
+   "id": "r1",
+   "name": "",
+   "type": "road",
+   "owner": -1,
+   "pos": [
+    180,
+    350
+   ]
+  },
+  {
+   "id": "r2",
+   "name": "",
+   "type": "road",
+   "owner": -1,
+   "pos": [
+    220,
+    590
+   ]
+  },
+  {
+   "id": "ruins",
+   "name": "旧城墟",
+   "type": "base",
+   "owner": -1,
+   "pos": [
+    300,
+    210
+   ],
+   "reward": {
+    "items": [
+     "glowstone_staff"
+    ]
+   }
+  },
+  {
+   "id": "salt",
+   "name": "盐田镇",
+   "type": "base",
+   "owner": -1,
+   "pos": [
+    390,
+    570
+   ],
+   "reward": {
+    "gold": 100
+   }
+  },
+  {
+   "id": "gate",
+   "name": "铁门关",
+   "type": "fort",
+   "owner": 1,
+   "pos": [
+    480,
+    380
+   ],
+   "durability": 60,
+   "reward": {
+    "items": [
+     "riveted_mail"
+    ]
+   }
+  },
+  {
+   "id": "r3",
+   "name": "",
+   "type": "road",
+   "owner": -1,
+   "pos": [
+    610,
+    220
+   ]
+  },
+  {
+   "id": "r4",
+   "name": "断桥营",
+   "type": "fort",
+   "owner": 1,
+   "pos": [
+    630,
+    540
+   ],
+   "durability": 60,
+   "reward": {
+    "gold": 80
+   }
+  },
+  {
+   "id": "shrine",
+   "name": "风语祠",
+   "type": "base",
+   "owner": 1,
+   "pos": [
+    720,
+    110
+   ],
+   "reward": {
+    "items": [
+     "dawnstar_badge"
+    ]
+   }
+  },
+  {
+   "id": "dock",
+   "name": "黑锚码头",
+   "type": "base",
+   "owner": 1,
+   "pos": [
+    770,
+    580
+   ],
+   "reward": {
+    "items": [
+     "wardrum_charm"
+    ]
+   }
+  },
+  {
+   "id": "tower",
+   "name": "灰塔",
+   "type": "hq",
+   "owner": 1,
+   "pos": [
+    860,
+    340
+   ],
+   "durability": 100,
+   "gold": 30
+  }
+ ],
+ "edges": [
+  [
+   "outpost",
+   "r1"
+  ],
+  [
+   "outpost",
+   "r2"
+  ],
+  [
+   "r1",
+   "ruins"
+  ],
+  [
+   "r1",
+   "gate"
+  ],
+  [
+   "r2",
+   "salt"
+  ],
+  [
+   "salt",
+   "gate"
+  ],
+  [
+   "ruins",
+   "r3"
+  ],
+  [
+   "gate",
+   "r3"
+  ],
+  [
+   "gate",
+   "r4"
+  ],
+  [
+   "salt",
+   "r4"
+  ],
+  [
+   "r3",
+   "shrine"
+  ],
+  [
+   "r4",
+   "dock"
+  ],
+  [
+   "shrine",
+   "tower"
+  ],
+  [
+   "dock",
+   "tower"
+  ],
+  [
+   "r3",
+   "tower"
+  ],
+  [
+   "r4",
+   "tower"
+  ]
+ ],
+ "squads": [
+  {
+   "id": "gate_guard",
+   "name": "铁门守备队",
+   "team": 1,
+   "color": "#c0392b",
+   "start": "gate",
+   "ai": {
+    "mode": "defend",
+    "radius": 150
+   },
+   "units": [
+    {
+     "name": "守备甲",
+     "class": "spearman",
+     "level": 6,
+     "row": 0,
+     "col": 1
+    },
+    {
+     "name": "守备乙",
+     "class": "guardian",
+     "level": 6,
+     "row": 0,
+     "col": 0
+    },
+    {
+     "name": "守备丙",
+     "class": "archer",
+     "level": 6,
+     "row": 1,
+     "col": 1
+    },
+    {
+     "name": "守备丁",
+     "class": "cleric",
+     "level": 6,
+     "row": 1,
+     "col": 0
+    }
+   ]
+  },
+  {
+   "id": "crows",
+   "name": "鸦羽巡哨",
+   "team": 1,
+   "color": "#6c3483",
+   "start": "shrine",
+   "ai": {
+    "mode": "patrol",
+    "route": [
+     "shrine",
+     "r3",
+     "ruins",
+     "r3"
+    ]
+   },
+   "units": [
+    {
+     "name": "巡哨甲",
+     "class": "skywing",
+     "level": 6,
+     "row": 1,
+     "col": 1
+    },
+    {
+     "name": "巡哨乙",
+     "class": "archer",
+     "level": 6,
+     "row": 1,
+     "col": 0
+    },
+    {
+     "name": "巡哨丙",
+     "class": "bard",
+     "level": 6,
+     "row": 1,
+     "col": 2
+    }
+   ]
+  },
+  {
+   "id": "dock_raid",
+   "name": "黑锚突击队",
+   "team": 1,
+   "color": "#e67e22",
+   "start": "dock",
+   "ai": {
+    "mode": "advance",
+    "delay": 70,
+    "targets": [
+     "salt",
+     "outpost"
+    ]
+   },
+   "units": [
+    {
+     "name": "黑锚甲",
+     "class": "cavalry",
+     "level": 6,
+     "row": 0,
+     "col": 1
+    },
+    {
+     "name": "黑锚乙",
+     "class": "assassin",
+     "level": 6,
+     "row": 0,
+     "col": 0
+    },
+    {
+     "name": "黑锚丙",
+     "class": "mage",
+     "level": 6,
+     "row": 1,
+     "col": 1
+    }
+   ]
+  },
+  {
+   "id": "bridge_guard",
+   "name": "断桥守军",
+   "team": 1,
+   "color": "#922b21",
+   "start": "r4",
+   "ai": {
+    "mode": "defend",
+    "radius": 130
+   },
+   "units": [
+    {
+     "name": "断桥甲",
+     "class": "warden",
+     "level": 6,
+     "row": 0,
+     "col": 1
+    },
+    {
+     "name": "断桥乙",
+     "class": "swordsman",
+     "level": 6,
+     "row": 0,
+     "col": 0
+    },
+    {
+     "name": "断桥丙",
+     "class": "mage",
+     "level": 6,
+     "row": 1,
+     "col": 1
+    },
+    {
+     "name": "断桥丁",
+     "class": "cleric",
+     "level": 6,
+     "row": 1,
+     "col": 0
+    }
+   ]
+  },
+  {
+   "id": "boss",
+   "name": "灰烬团长·索格",
+   "team": 1,
+   "color": "#5d0f0f",
+   "start": "tower",
+   "ai": {
+    "mode": "defend",
+    "radius": 170,
+    "boss": true
+   },
+   "units": [
+    {
+     "name": "索格",
+     "class": "blademaster",
+     "level": 9,
+     "row": 0,
+     "col": 1
+    },
+    {
+     "name": "灰烬亲卫",
+     "class": "bulwark",
+     "level": 8,
+     "row": 0,
+     "col": 0
+    },
+    {
+     "name": "灰烬术士",
+     "class": "pyrosage",
+     "level": 8,
+     "row": 1,
+     "col": 1
+    },
+    {
+     "name": "灰烬司祭",
+     "class": "dawnpriest",
+     "level": 8,
+     "row": 1,
+     "col": 0
+    },
+    {
+     "name": "灰烬射手",
+     "class": "stargazer",
+     "level": 8,
+     "row": 1,
+     "col": 2
+    }
+   ]
+  }
+ ]
+}

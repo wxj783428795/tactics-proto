@@ -1,0 +1,335 @@
+{
+ "name": "风车丘",
+ "objective": {
+  "type": "defend",
+  "time": 150
+ },
+ "nodes": [
+  {
+   "id": "village",
+   "name": "风车丘村",
+   "type": "hq",
+   "owner": 0,
+   "pos": [
+    230,
+    330
+   ],
+   "durability": 100
+  },
+  {
+   "id": "hut",
+   "name": "苇塘小屋",
+   "type": "base",
+   "owner": 0,
+   "pos": [
+    90,
+    170
+   ]
+  },
+  {
+   "id": "well",
+   "name": "古井集",
+   "type": "base",
+   "owner": -1,
+   "pos": [
+    390,
+    150
+   ],
+   "reward": {
+    "gold": 80,
+    "items": [
+     "frostspine_pike"
+    ]
+   }
+  },
+  {
+   "id": "orchard",
+   "name": "梨园",
+   "type": "base",
+   "owner": -1,
+   "pos": [
+    370,
+    520
+   ],
+   "reward": {
+    "items": [
+     "windrunner_cloak"
+    ]
+   }
+  },
+  {
+   "id": "bridge",
+   "name": "碎石桥",
+   "type": "fort",
+   "owner": -1,
+   "pos": [
+    540,
+    330
+   ],
+   "durability": 60,
+   "reward": {
+    "items": [
+     "tidemark_axe"
+    ]
+   }
+  },
+  {
+   "id": "r1",
+   "name": "",
+   "type": "road",
+   "owner": -1,
+   "pos": [
+    700,
+    200
+   ]
+  },
+  {
+   "id": "r2",
+   "name": "",
+   "type": "road",
+   "owner": -1,
+   "pos": [
+    700,
+    470
+   ]
+  },
+  {
+   "id": "sp1",
+   "name": "东林道口",
+   "type": "road",
+   "owner": -1,
+   "pos": [
+    880,
+    170
+   ]
+  },
+  {
+   "id": "sp2",
+   "name": "南滩道口",
+   "type": "road",
+   "owner": -1,
+   "pos": [
+    880,
+    500
+   ]
+  }
+ ],
+ "edges": [
+  [
+   "hut",
+   "village"
+  ],
+  [
+   "village",
+   "well"
+  ],
+  [
+   "village",
+   "orchard"
+  ],
+  [
+   "village",
+   "bridge"
+  ],
+  [
+   "well",
+   "bridge"
+  ],
+  [
+   "orchard",
+   "bridge"
+  ],
+  [
+   "well",
+   "r1"
+  ],
+  [
+   "bridge",
+   "r1"
+  ],
+  [
+   "bridge",
+   "r2"
+  ],
+  [
+   "orchard",
+   "r2"
+  ],
+  [
+   "r1",
+   "sp1"
+  ],
+  [
+   "r2",
+   "sp2"
+  ]
+ ],
+ "squads": [
+  {
+   "id": "w1",
+   "name": "灰烬前锋",
+   "team": 1,
+   "color": "#c0392b",
+   "start": "sp1",
+   "ai": {
+    "mode": "advance",
+    "delay": 5,
+    "targets": [
+     "well",
+     "village"
+    ]
+   },
+   "units": [
+    {
+     "name": "前锋甲",
+     "class": "swordsman",
+     "level": 3,
+     "row": 0,
+     "col": 1
+    },
+    {
+     "name": "前锋乙",
+     "class": "spearman",
+     "level": 3,
+     "row": 0,
+     "col": 0
+    },
+    {
+     "name": "前锋丙",
+     "class": "archer",
+     "level": 3,
+     "row": 1,
+     "col": 1
+    }
+   ]
+  },
+  {
+   "id": "w2",
+   "name": "赤沙骑队",
+   "team": 1,
+   "color": "#e67e22",
+   "start": "sp2",
+   "ai": {
+    "mode": "advance",
+    "delay": 30,
+    "targets": [
+     "orchard",
+     "village"
+    ]
+   },
+   "units": [
+    {
+     "name": "赤沙甲",
+     "class": "cavalry",
+     "level": 4,
+     "row": 0,
+     "col": 1
+    },
+    {
+     "name": "赤沙乙",
+     "class": "cavalry",
+     "level": 4,
+     "row": 0,
+     "col": 0
+    },
+    {
+     "name": "赤沙丙",
+     "class": "mage",
+     "level": 4,
+     "row": 1,
+     "col": 1
+    }
+   ]
+  },
+  {
+   "id": "w3",
+   "name": "鸦羽突袭队",
+   "team": 1,
+   "color": "#6c3483",
+   "start": "sp1",
+   "ai": {
+    "mode": "advance",
+    "delay": 65,
+    "targets": [
+     "bridge",
+     "village"
+    ]
+   },
+   "units": [
+    {
+     "name": "鸦羽甲",
+     "class": "skywing",
+     "level": 4,
+     "row": 1,
+     "col": 1
+    },
+    {
+     "name": "鸦羽乙",
+     "class": "skywing",
+     "level": 4,
+     "row": 1,
+     "col": 0
+    },
+    {
+     "name": "鸦羽丙",
+     "class": "bard",
+     "level": 4,
+     "row": 1,
+     "col": 2
+    },
+    {
+     "name": "鸦羽丁",
+     "class": "archer",
+     "level": 4,
+     "row": 0,
+     "col": 1
+    }
+   ]
+  },
+  {
+   "id": "w4",
+   "name": "铁棘重步",
+   "team": 1,
+   "color": "#7b241c",
+   "start": "sp2",
+   "ai": {
+    "mode": "advance",
+    "delay": 95,
+    "targets": [
+     "bridge",
+     "village"
+    ]
+   },
+   "units": [
+    {
+     "name": "铁棘甲",
+     "class": "warden",
+     "level": 5,
+     "row": 0,
+     "col": 1
+    },
+    {
+     "name": "铁棘乙",
+     "class": "spearman",
+     "level": 5,
+     "row": 0,
+     "col": 0
+    },
+    {
+     "name": "铁棘丙",
+     "class": "cleric",
+     "level": 5,
+     "row": 1,
+     "col": 1
+    },
+    {
+     "name": "铁棘丁",
+     "class": "archer",
+     "level": 5,
+     "row": 1,
+     "col": 0
+    }
+   ]
+  }
+ ]
+}
